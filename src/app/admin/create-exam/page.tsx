@@ -76,103 +76,169 @@ export default function CreateExamPage() {
 
     return (
         <ProtectedRoute requiredRole="admin">
-            <div className="max-w-2xl mx-auto px-6 py-8">
-                <Link href="/admin" className="text-primary hover:underline mb-8 inline-block">
-                    ← Back to Admin Panel
-                </Link>
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-primary via-secondary to-cyan-500 text-white py-12 px-6">
+                    <div className="max-w-4xl mx-auto">
+                        <Link href="/admin" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors">
+                            ← Back to Admin Panel
+                        </Link>
+                        <h1 className="text-5xl font-bold mb-2">✍️ Create New Exam</h1>
+                        <p className="text-xl opacity-90">Set up a new examination with all required details</p>
+                    </div>
+                </div>
 
-                <div className="card shadow-lg">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-8">Create New Exam</h1>
+                <div className="max-w-4xl mx-auto px-6 py-12">
+                    <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-8 md:p-12">
+                        {error && (
+                            <div className="mb-8 p-4 bg-red-500/20 border border-red-400/50 text-red-100 rounded-lg text-sm flex items-center gap-2 animate-bounce">
+                                <span>⚠️</span>
+                                <span>{error}</span>
+                            </div>
+                        )}
+                        {success && (
+                            <div className="mb-8 p-4 bg-green-500/20 border border-green-400/50 text-green-100 rounded-lg text-sm flex items-center gap-2 animate-pulse">
+                                <span>✅</span>
+                                <span>{success}</span>
+                            </div>
+                        )}
 
-                    {error && <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">{error}</div>}
-                    {success && <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">{success}</div>}
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            {/* Exam Title & Subject */}
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                    📋 Basic Information
+                                </h2>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="label">Exam Title *</label>
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                className="input-field"
-                                placeholder="e.g., Java Fundamentals"
-                                required
-                            />
-                        </div>
+                                <div>
+                                    <label className="block text-gray-900 font-bold text-sm mb-2">📚 Exam Title *</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
+                                        placeholder="e.g., Java Fundamentals"
+                                        required
+                                    />
+                                </div>
 
-                        <div>
-                            <label className="label">Subject *</label>
-                            <input
-                                type="text"
-                                name="subject"
-                                value={formData.subject}
-                                onChange={handleChange}
-                                className="input-field"
-                                placeholder="e.g., Programming"
-                                required
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="label">Duration (minutes) *</label>
-                                <input
-                                    type="number"
-                                    name="duration"
-                                    value={formData.duration}
-                                    onChange={handleChange}
-                                    className="input-field"
-                                    min="1"
-                                    required
-                                />
+                                <div>
+                                    <label className="block text-gray-900 font-bold text-sm mb-2">🎓 Subject *</label>
+                                    <input
+                                        type="text"
+                                        name="subject"
+                                        value={formData.subject}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
+                                        placeholder="e.g., Programming"
+                                        required
+                                    />
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="label">Total Marks *</label>
-                                <input
-                                    type="number"
-                                    name="totalMarks"
-                                    value={formData.totalMarks}
-                                    onChange={handleChange}
-                                    className="input-field"
-                                    min="1"
-                                    required
-                                />
+                            {/* Divider */}
+                            <div className="border-t-2 border-gray-200"></div>
+
+                            {/* Exam Settings */}
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                    ⚙️ Exam Settings
+                                </h2>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label className="block text-gray-900 font-bold text-sm mb-2">⏱️ Duration (minutes) *</label>
+                                        <input
+                                            type="number"
+                                            name="duration"
+                                            value={formData.duration}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
+                                            min="1"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-gray-900 font-bold text-sm mb-2">📊 Total Marks *</label>
+                                        <input
+                                            type="number"
+                                            name="totalMarks"
+                                            value={formData.totalMarks}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
+                                            min="1"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-gray-900 font-bold text-sm mb-2">✅ Passing Marks *</label>
+                                        <input
+                                            type="number"
+                                            name="passingMarks"
+                                            value={formData.passingMarks}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200"
+                                            min="0"
+                                            max={formData.totalMarks - 1}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Summary Card */}
+                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4">
+                                    <h3 className="font-bold text-blue-900 mb-3">📝 Summary</h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <p className="text-blue-700">Duration</p>
+                                            <p className="font-bold text-blue-900">{formData.duration} min</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-blue-700">Total Marks</p>
+                                            <p className="font-bold text-blue-900">{formData.totalMarks}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-blue-700">Pass Marks</p>
+                                            <p className="font-bold text-blue-900">{formData.passingMarks}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <label className="label">Passing Marks *</label>
-                            <input
-                                type="number"
-                                name="passingMarks"
-                                value={formData.passingMarks}
-                                onChange={handleChange}
-                                className="input-field"
-                                min="0"
-                                max={formData.totalMarks - 1}
-                                required
-                            />
-                        </div>
+                            {/* Divider */}
+                            <div className="border-t-2 border-gray-200"></div>
 
-                        <div className="flex gap-4 pt-4">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary flex-1 font-semibold py-3"
-                            >
-                                {loading ? 'Creating...' : 'Create Exam'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => router.back()}
-                                className="btn-secondary flex-1 font-semibold py-3"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
+                            {/* Action Buttons */}
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            🚀 Create Exam
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    className="flex-1 py-3 border-2 border-gray-300 text-gray-900 font-bold rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-2"
+                                >
+                                    ❌ Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </ProtectedRoute>
