@@ -81,6 +81,13 @@ export default function ManageQuestionsPage() {
             return;
         }
 
+        // Validate marks total
+        const currentExam = exams.find((e) => e._id === selectedExamId);
+        if (currentExam && totalMarksFromQuestions + formData.marks > currentExam.totalMarks) {
+            setError(`Cannot add question. Total marks (${totalMarksFromQuestions + formData.marks}) exceeds exam total (${currentExam.totalMarks})`);
+            return;
+        }
+
         setSubmitting(true);
 
         try {
@@ -120,6 +127,13 @@ export default function ManageQuestionsPage() {
         }
     };
 
+    // Calculate marks totals
+    const selectedExam = exams.find((e) => e._id === selectedExamId);
+    const totalMarksFromQuestions = questions.reduce((sum, q) => sum + (q.marks || 0), 0);
+    const marksMatch = selectedExam ? totalMarksFromQuestions === selectedExam.totalMarks : false;
+    const marksMismatch = selectedExam && totalMarksFromQuestions !== selectedExam.totalMarks;
+    const remainingMarks = selectedExam ? selectedExam.totalMarks - totalMarksFromQuestions : 0;
+
     return (
         <ProtectedRoute requiredRole="admin">
             <div className="max-w-7xl mx-auto px-6 py-8">
@@ -128,6 +142,29 @@ export default function ManageQuestionsPage() {
                 </Link>
 
                 <h1 className="text-4xl font-bold text-gray-800 mb-8">Manage Questions</h1>
+
+                {/* Marks Validation Warning */}
+                {selectedExam && (
+                    <div className={`mb-8 p-4 rounded-lg border-l-4 ${marksMatch ? 'bg-green-50 border-green-500' : 'bg-yellow-50 border-yellow-500'}`}>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className={`font-semibold mb-1 ${marksMatch ? 'text-green-900' : 'text-yellow-900'}`}>
+                                    {marksMatch ? '✓ Marks Match' : '⚠ Marks Mismatch'}
+                                </h3>
+                                <p className={`text-sm ${marksMatch ? 'text-green-800' : 'text-yellow-800'}`}>
+                                    Exam Total: <span className="font-bold">{selectedExam.totalMarks}</span> marks |
+                                    Questions Total: <span className="font-bold">{totalMarksFromQuestions}</span> marks |
+                                    Remaining: <span className={`font-bold ${remainingMarks > 0 ? 'text-red-600' : ''}`}>{remainingMarks}</span> marks
+                                </p>
+                            </div>
+                            {marksMismatch && (
+                                <span className="text-xs bg-yellow-600 text-white px-3 py-1 rounded-full font-semibold">
+                                    Cannot Publish
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Form */}
@@ -203,11 +240,17 @@ export default function ManageQuestionsPage() {
                                     <input
                                         type="number"
                                         value={formData.marks}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, marks: parseInt(e.target.value) }))}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, marks: parseInt(e.target.value) || 1 }))}
                                         className="input-field text-sm"
                                         min="1"
+                                        max={selectedExam ? Math.max(1, selectedExam.totalMarks - totalMarksFromQuestions + formData.marks) : 999}
                                         required
                                     />
+                                    {selectedExam && (
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            Available: {Math.max(0, remainingMarks)} marks remaining
+                                        </p>
+                                    )}
                                 </div>
 
                                 <button type="submit" disabled={submitting || !selectedExamId} className="btn-primary w-full text-sm">
@@ -242,8 +285,8 @@ export default function ManageQuestionsPage() {
                                                     <div
                                                         key={optIdx}
                                                         className={`p-2 rounded text-sm ${optIdx === question.correctAnswer
-                                                                ? 'bg-green-100 text-green-800 border border-green-300'
-                                                                : 'bg-gray-100 text-gray-700'
+                                                            ? 'bg-green-100 text-green-800 border border-green-300'
+                                                            : 'bg-gray-100 text-gray-700'
                                                             }`}
                                                     >
                                                         {String.fromCharCode(65 + optIdx)}) {option}

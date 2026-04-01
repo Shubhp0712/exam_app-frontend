@@ -44,4 +44,12 @@ export const examService = {
     async deleteQuestion(id: string): Promise<void> {
         await apiClient.delete(`/questions/${id}`);
     },
+
+    async checkExamCompletion(examId: string): Promise<{ isCompleted: boolean; result?: any }> {
+        const response = await apiClient.get<{ success: boolean; isCompleted: boolean; result?: any }>(`/exams/${examId}/check-completion`);
+        return {
+            isCompleted: response.data.isCompleted,
+            result: response.data.result,
+        };
+    },
 };

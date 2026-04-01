@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { ExamCard } from '@/components/ExamCard';
@@ -13,6 +14,7 @@ export default function AdminPage() {
     const [exams, setExams] = useState<Exam[]>([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ totalExams: 0, draftExams: 0, publishedExams: 0 });
+    const router = useRouter();
 
     useEffect(() => {
         loadData();
@@ -38,9 +40,10 @@ export default function AdminPage() {
         try {
             await examService.publishExam(id);
             await loadData();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to publish exam:', err);
-            alert('Failed to publish exam');
+            const errorMsg = err.response?.data?.message || 'Failed to publish exam';
+            alert(errorMsg);
         }
     };
 
@@ -54,6 +57,12 @@ export default function AdminPage() {
                 alert('Failed to delete exam');
             }
         }
+    };
+
+    const handleEdit = (exam: Exam) => {
+        // Store exam data in localStorage for the edit page
+        localStorage.setItem('editExamData', JSON.stringify(exam));
+        router.push(`/admin/edit-exam/${exam._id}`);
     };
 
     return (
@@ -94,6 +103,12 @@ export default function AdminPage() {
                     >
                         Manage Questions
                     </Link>
+                    <Link
+                        href="/admin/results"
+                        className="py-4 px-6 border-b-2 border-transparent text-gray-600 hover:text-gray-800"
+                    >
+                        View Results
+                    </Link>
                 </div>
 
                 {/* Action Buttons */}
@@ -101,6 +116,16 @@ export default function AdminPage() {
                     <Link href="/admin/create-exam" className="btn-primary bg-primary text-white hover:bg-primary/90">
                         + Create New Exam
                     </Link>
+                </div>
+
+                {/* Publishing Workflow Info */}
+                <div className="mb-8 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                    <h3 className="font-semibold text-blue-900 mb-2">📋 Publishing Workflow</h3>
+                    <ol className="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+                        <li>Create a new exam</li>
+                        <li>Go to "Manage Questions" tab and add questions</li>
+                        <li>Return here and click "Publish" to make it available to students</li>
+                    </ol>
                 </div>
 
                 {/* Exams List */}
@@ -117,6 +142,7 @@ export default function AdminPage() {
                             <ExamCard
                                 key={exam._id}
                                 exam={exam}
+                                onEdit={handleEdit}
                                 onDelete={handleDelete}
                                 onPublish={handlePublish}
                             />

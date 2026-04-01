@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import { authService } from '@/services/authService';
 
 export default function SignupPage() {
+    const router = useRouter();
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -12,11 +14,21 @@ export default function SignupPage() {
     const [role, setRole] = useState<'student' | 'admin'>('student');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { signup } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // Validation
+        if (!fullName.trim()) {
+            setError('Full name is required');
+            return;
+        }
+
+        if (!email.trim()) {
+            setError('Email is required');
+            return;
+        }
 
         if (password !== confirmPassword) {
             setError('Passwords do not match');
@@ -31,9 +43,28 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            await signup(fullName, email, password, confirmPassword, role);
+            // Send OTP
+            const response = await authService.sendOTP({
+                fullName,
+                email,
+                password,
+                confirmPassword,
+                role,
+            });
+
+            // Store signup data in localStorage for resend OTP
+            localStorage.setItem('signupData', JSON.stringify({
+                fullName,
+                email,
+                password,
+                confirmPassword,
+                role,
+            }));
+
+            // Redirect to OTP verification page
+            router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to sign up. Please try again.');
+            setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -108,7 +139,7 @@ export default function SignupPage() {
                         </div>
 
                         <button type="submit" disabled={loading} className="btn-primary w-full font-semibold">
-                            {loading ? 'Creating account...' : 'Sign Up'}
+                            {loading ? 'Sending OTP...' : 'Sign Up'}
                         </button>
                     </form>
 

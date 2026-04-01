@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -22,6 +23,7 @@ export default function ExamDetailPage() {
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [alreadyCompleted, setAlreadyCompleted] = useState(false);
 
     useEffect(() => {
         loadExam();
@@ -47,6 +49,16 @@ export default function ExamDetailPage() {
     const loadExam = async () => {
         try {
             setLoading(true);
+
+            // Check if student has already completed this exam
+            const completionCheck = await examService.checkExamCompletion(examId);
+            if (completionCheck.isCompleted) {
+                setAlreadyCompleted(true);
+                setError('You have already completed this exam. Retaking is not allowed.');
+                setLoading(false);
+                return;
+            }
+
             const examData = await examService.getExamById(examId);
             const questionsData = await examService.getExamQuestions(examId);
 
@@ -105,6 +117,39 @@ export default function ExamDetailPage() {
                     <div className="flex flex-col items-center space-y-4">
                         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                         <p className="text-gray-600">Loading exam...</p>
+                    </div>
+                </div>
+            </ProtectedRoute>
+        );
+    }
+
+    if (alreadyCompleted) {
+        return (
+            <ProtectedRoute>
+                <div className="max-w-2xl mx-auto px-6 py-8 text-center">
+                    <div className="bg-red-50 border-2 border-red-300 rounded-lg p-8">
+                        <div className="text-6xl mb-4">❌</div>
+                        <h1 className="text-3xl font-bold text-red-700 mb-4">Exam Already Completed</h1>
+                        <p className="text-red-600 text-lg mb-6">
+                            You have already completed this exam. Retaking is not allowed as per exam policy.
+                        </p>
+                        <p className="text-gray-600 mb-8">
+                            To view your result, please go to your results page.
+                        </p>
+                        <div className="flex gap-4 justify-center">
+                            <Link
+                                href="/result"
+                                className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-secondary transition-colors"
+                            >
+                                View Results
+                            </Link>
+                            <Link
+                                href="/dashboard"
+                                className="px-6 py-3 bg-gray-300 text-gray-800 rounded-lg font-semibold hover:bg-gray-400 transition-colors"
+                            >
+                                Back to Dashboard
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </ProtectedRoute>
@@ -206,10 +251,10 @@ export default function ExamDetailPage() {
                                     key={q._id}
                                     onClick={() => setCurrentQuestionIndex(idx)}
                                     className={`aspect-square rounded-lg font-semibold transition-colors ${idx === currentQuestionIndex
-                                            ? 'bg-primary text-white'
-                                            : answers[q._id] !== undefined
-                                                ? 'bg-green-500 text-white'
-                                                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                                        ? 'bg-primary text-white'
+                                        : answers[q._id] !== undefined
+                                            ? 'bg-green-500 text-white'
+                                            : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                                         }`}
                                 >
                                     {idx + 1}

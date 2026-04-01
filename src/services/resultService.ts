@@ -26,6 +26,11 @@ export const resultService = {
         return response.data.statistics;
     },
 
+    async getExamResults(examId: string): Promise<any[]> {
+        const response = await apiClient.get<{ success: boolean; results: any[] }>(`/results/exam/${examId}`);
+        return response.data.results;
+    },
+
     async getAllResults(): Promise<Result[]> {
         const response = await apiClient.get<{ success: boolean; results: any[] }>('/results');
         return response.data.results.map((r) => this.normalizeResult(r));
